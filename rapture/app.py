@@ -29,7 +29,7 @@ def shutdown(signum, frame):
 def run():
     signal.signal(signal.SIGTERM, shutdown)
     signal.signal(signal.SIGINT, shutdown)
-    setup_logging()
+    setup_logging(conf['app']['log_level'])
     watch_dir = conf['app']['watch_dir']
     scan_interval = conf['app']['scan_interval']
     

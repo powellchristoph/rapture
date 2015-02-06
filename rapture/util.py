@@ -53,13 +53,13 @@ def validate_config(config_file):
 
     return settings
 
-def setup_logging(log_level=INFO):
+def setup_logging(log_level=logging.INFO):
     LOG_LEVELS = {
-            'debug'     : logging.DEBUG,
-            'info'      : logging.INFO,
-            'warning'   : logging.WARNING,
-            'error'     : logging.ERROR,
-            'critical'  : logging.CRITICAL
+            'DEBUG'     : logging.DEBUG,
+            'INFO'      : logging.INFO,
+            'WARNING'   : logging.WARNING,
+            'ERROR'     : logging.ERROR,
+            'CRITICAL'  : logging.CRITICAL
     }
 
     print "Setup logging."
