@@ -3,6 +3,7 @@
 import logging
 import os
 import threading
+import time
 
 import pyrax
 pyrax.set_setting("identity_type", "rackspace")
@@ -20,17 +21,23 @@ def cloudfiles_func(settings, filename):
     cf = pyrax.connect_to_cloudfiles(region=region)
 
     container = cf.get_container(container_name)
+
+    if os.path.getsize(filename) >= 5368709120:
+        logger.error("File too large. Files over 5GB are not currently supported.")
+        return
     
     chksum = pyrax.utils.get_checksum(filename)
     for i in range(MAX_RETRIES):
         try:
-            logger.debug("Starting file transfer to %s." % container_name)
+            start = time.time()
             cf.upload_file(container, filename, etag=chksum)
-            logger.debug("Transfer complete.")
+            end = time.time()
+            logger.debug("Transfer complete in %.2f secs." % (end - start))
             os.remove(filename)
             break
-        except pyrax.UploadFailed:
+        except pyrax.exceptions.UploadFailed:
             logger.warning("Upload to container:%s in %s failed, retry %d" % (container_name, region, i))
+            time.sleep(2)
     else:
         logger.error("Upload to container:%s in %s failed!" % (container_name, region))
 

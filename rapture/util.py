@@ -22,6 +22,7 @@ def validate_config(config_file):
         settings[section] = {}
         settings['app']['watch_dir'] = parser.get(section, 'watch_dir')
         settings['app']['scan_interval'] = int(parser.get(section, 'scan_interval'))
+        settings['app']['log_level'] = parser.get(section, 'log_level')
     except Exception, e:
         die('Error in the configuration file.', e)
 
@@ -52,10 +53,18 @@ def validate_config(config_file):
 
     return settings
 
-def setup_logging():
+def setup_logging(log_level=INFO):
+    LOG_LEVELS = {
+            'debug'     : logging.DEBUG,
+            'info'      : logging.INFO,
+            'warning'   : logging.WARNING,
+            'error'     : logging.ERROR,
+            'critical'  : logging.CRITICAL
+    }
+
     print "Setup logging."
     logger = logging.getLogger('rapture')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(LOG_LEVELS[log_level])
     handler = logging.StreamHandler(sys.stdout)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)

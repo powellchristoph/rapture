@@ -1,5 +1,7 @@
 import logging
 import os
+import signal
+import sys
 import time
 
 from rapture import conf
@@ -20,7 +22,13 @@ def scan(watch_dir):
             if os.path.isfile(os.path.join(watch_dir, f))
             and not f.startswith('.')]
 
+def shutdown(signum, frame):
+    info("Shutting down...")
+    sys.exit(0)
+
 def run():
+    signal.signal(signal.SIGTERM, shutdown)
+    signal.signal(signal.SIGINT, shutdown)
     setup_logging()
     watch_dir = conf['app']['watch_dir']
     scan_interval = conf['app']['scan_interval']

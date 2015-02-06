@@ -21,7 +21,6 @@ class TransportManager(object):
     def check_files(self, file_list, delay=10):
         if not file_list:
             return []
-        self.logger.debug("Starting file readiness check.")
         ready_files = []
         tmp = {}
 
@@ -36,13 +35,18 @@ class TransportManager(object):
         time.sleep(delay)
 
         for filename in file_list:
+            last_byte = get_last_byte(filename)
             if tmp[filename] == get_last_byte(filename):
                 ready_files.append(filename)
 
         return sorted(ready_files)
 
     def transfer(self, file_list):
-        for file_ in self.check_files(file_list):
+        ready_files = self.check_files(file_list)
+        if not ready_files:
+            return
+        start = time.time()
+        for file_ in ready_files:
             self.logger.info("Transferring %s" % file_)
             for d in self.drivers:
                 driver = threading.Thread(
@@ -54,3 +58,4 @@ class TransportManager(object):
 
             for t in self.threads:
                 t.join()
+        self.logger.debug("Completed %d files in %.2f secs." % (len(ready_files), (time.time() - start)))
