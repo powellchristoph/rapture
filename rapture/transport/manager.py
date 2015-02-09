@@ -70,11 +70,9 @@ class TransportManager(object):
         if not ready_files:
             return
 
+        self.load_errors()
         for filename in ready_files:
-            self.logger.info("Transferring %s" % filename)
-
             # If there was a previous error, retry only the failed workers
-            self.load_errors()
             if filename in self.errors.keys():
                 failed_workers = self.errors[filename]
                 self.logger.warning("Found previous error, retrying %s with %s drivers." % (filename, ','.join(failed_workers)))
@@ -82,7 +80,10 @@ class TransportManager(object):
             else:
                 self.execute(filename, self.all_workers)
 
+        self.dump_errors()
+
     def execute(self, filename, workers):
+        start = time.time()
         results = []
         for d in workers:
             worker = threading.Thread(
@@ -97,16 +98,21 @@ class TransportManager(object):
 
         if results:
             # Write out any errors to self.error_file
+            self.logger.warning("Errors found for %s" % filename)
             self.errors[filename] = results
-            self.dump_errors()
         else:
             # Transfer was successful, delete the file
+            end = time.time()
+            self.errors.pop(filename, None)
+            self.logger.info("%s was successful. Completed in %.2f secs." % (filename, (end - start)))
             os.remove(filename)
 
     def dump_errors(self):
         # Writes out the errors to the error_file
         with open(self.error_file, 'w') as outfile:
             json.dump(self.errors, outfile, sort_keys=True)
+            self.logger.debug("Dumping errors:")
+            self.logger.debug(self.errors)
 
     def load_errors(self):
         # Loads the errors from the error_file
@@ -118,3 +124,5 @@ class TransportManager(object):
 
         with open(self.error_file) as infile:
             self.errors = json.load(infile)
+            self.logger.debug("Loaded errors:")
+            self.logger.debug(self.errors)

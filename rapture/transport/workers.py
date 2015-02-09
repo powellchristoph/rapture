@@ -58,24 +58,30 @@ def scp_func(settings, filename, results):
     name = threading.currentThread().getName()
     logger = logging.getLogger(__name__ + "." + name)
 
-    """
-
     address = settings['address']
     username = settings['username']
-    port = int(settings.get('port', 22))
+    port = settings.get('port', 22)
 
-    if password in settings.keys():
+    if 'password' in settings.keys():
         password = settings['password']
     else:
         ssh_key = settings['ssh_key']
 
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    s.connect(address, port, username=username, password=password, timeout=4)
+    try:
+        s.connect(address, port, username=username, password=password, timeout=4)
+    except Exception as e:
+        results.append(name)
+        print str(e)
+        return
 
     sftp = s.open_sftp()
+    logger.debug("Transferring %s" % filename)
+    start = time.time()
     sftp.put(filename, os.path.basename(filename))
-    """
+    end = time.time()
+    logger.debug("Tranfer completed in %.2f secs" % (end - start))
 
 
 
