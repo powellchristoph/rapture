@@ -43,7 +43,7 @@ def cloudfiles_func(settings, filename, results):
             logger.debug("Transfer complete in %.2f secs." % (end - start))
             break
         except pyrax.exceptions.UploadFailed:
-            logger.warning("Upload to container:%s in %s failed, retry %d" % (container_name, region, i))
+            logger.warning("Upload to container:%s in %s failed, retry %d" % (container_name, region, i + 1))
             time.sleep(2)
     else:
         logger.error("Upload to container:%s in %s failed!" % (container_name, region))
@@ -71,22 +71,21 @@ def scp_func(settings, filename, results):
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
         s.connect(address, port, username=username, password=password, timeout=4)
+        sftp = s.open_sftp()
     except Exception as e:
         results.append(name)
-        print str(e)
         return
 
-    sftp = s.open_sftp()
-    logger.debug("Transferring %s" % filename)
-    start = time.time()
-    sftp.put(filename, os.path.basename(filename))
-    end = time.time()
-    logger.debug("Tranfer completed in %.2f secs" % (end - start))
-
-
-
-
-
-
-
-
+    for i in range(MAX_RETRIES):
+        try:
+            start = time.time()
+            sftp.put(filename, os.path.basename(filename))
+            end = time.time()
+            logger.debug("Tranfer completed in %.2f secs" % (end - start))
+            break
+        except Exception as e:
+            logger.warning("Upload to server:%s failed, retry %d" % (container_name, i + 1))
+            time.sleep(2)
+    else:
+        logger.error("Upload to server:%s failed!" % (container_name))
+        results.append(name)
