@@ -3,7 +3,7 @@ import sys
 
 from setuptools import setup, find_packages
 
-REQUIRES = ['pyrax', ]
+REQUIRES = ['pyrax', 'paramiko']
             
 setup(
     name='rapture',

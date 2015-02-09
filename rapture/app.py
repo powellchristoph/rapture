@@ -32,9 +32,10 @@ def run():
     setup_logging(conf['app']['log_level'])
     watch_dir = conf['app']['watch_dir']
     scan_interval = conf['app']['scan_interval']
+    error_file = conf['app']['error_file']
     
     info('Starting Rapture, watching %s' % watch_dir)
-    tm = TransportManager()
+    tm = TransportManager(error_file)
 
     while True:
         found_files = scan(watch_dir)
