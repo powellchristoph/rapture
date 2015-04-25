@@ -27,10 +27,10 @@ def validate_config(config_file):
     except Exception, e:
         die('Error in the configuration file.', e)
 
-    if parser.has_section('cloudfiles'):
+    def validate_cloudfiles(section):
         try:
-            section = 'cloudfiles'
             settings[section] = {}
+            settings[section]['type'] = parser.get(section, 'type')
             settings[section]['credential_file'] = parser.get(section, 'credential_file')
             settings[section]['container_name'] = parser.get(section, 'container_name')
             settings[section]['region'] = parser.get(section, 'region')
@@ -38,10 +38,10 @@ def validate_config(config_file):
         except Exception, e:
             die('Error in the configuration file.', e)
 
-    if parser.has_section('scp'):
+    def validate_scp(section):
         try:
-            section = 'scp'
             settings[section] = {}
+            settings[section]['type'] = parser.get(section, 'type')
             settings[section]['address'] = parser.get(section, 'address')
             settings[section]['username'] = parser.get(section, 'username')
             if parser.has_option(section, 'password'):
@@ -52,6 +52,14 @@ def validate_config(config_file):
                 die('Cannot find valid password or ssh_key for %s user' % settings['username'])
         except Exception, e:
             die('Error in the configuration file.', e)
+
+    for section_name in [section for section in parser.sections() if section != 'app']:
+        if parser.get(section_name, 'type') == 'cloudfiles':
+            validate_cloudfiles(section_name)
+        elif parser.get(section_name, 'type') == 'scp':
+            validate_scp(section_name)
+        else:
+            die('Unsupported transport type: %s/%s' % (section_name, parser.get(section_name)))
 
     return settings
 

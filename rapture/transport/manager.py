@@ -88,7 +88,7 @@ class TransportManager(object):
         for d in workers:
             worker = threading.Thread(
                     name=d,
-                    target=WORKER_FUNCTIONS[d],
+                    target=WORKER_FUNCTIONS.get(conf[d]['type']),
                     args=(conf[d], filename, results))
             worker.start()
             self.threads.append(worker)
