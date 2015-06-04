@@ -31,47 +31,13 @@ class TransportManager(object):
         self.errors = {} 
         # { '/path/to/file': [wroker1, worker4] }
 
-    def check_files(self, file_list, delay=10):
-        """
-        Performs a check against the given files to ensure they are not actively being
-        written.
-        """
-
-        if not file_list:
-            return []
-        ready_files = []
-        tmp = {}
-
-        def get_last_byte(filename):
-            with open(filename, 'rb') as f:
-                f.seek(0, 2)
-                return f.tell()
-    
-        for filename in file_list:
-            tmp[filename] = get_last_byte(filename)
-
-        time.sleep(delay)
-
-        for filename in file_list:
-            last_byte = get_last_byte(filename)
-            if tmp[filename] == get_last_byte(filename):
-                ready_files.append(filename)
-
-        return sorted(ready_files)
-
     def transfer(self, file_list):
         """
         Executes the file transfer for the given methods.
         """
 
-        # Validate files are finished transferring
-        ready_files = self.check_files(file_list)
-
-        if not ready_files:
-            return
-
         self.load_errors()
-        for filename in ready_files:
+        for filename in file_list:
             # If there was a previous error, retry only the failed workers
             if filename in self.errors.keys():
                 failed_workers = self.errors[filename]
