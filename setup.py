@@ -3,7 +3,7 @@ import sys
 
 from setuptools import setup, find_packages
 
-REQUIRES = ['pyrax', 'paramiko']
+REQUIRES = ['pyrax', 'paramiko', 'python-gnupg']
             
 setup(
     name='rapture',
