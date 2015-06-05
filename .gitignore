@@ -58,4 +58,8 @@ docs/_build/
 # PyBuilder
 target/
 
+# Rapture specific files
 .rapture
+etc/rapture.conf.orig
+etc/rapture.conf.test
+

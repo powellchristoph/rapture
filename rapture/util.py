@@ -1,4 +1,5 @@
 import gnupg
+import gzip
 import logging
 import os
 import sys
@@ -23,14 +24,17 @@ def validate_config(config_file):
     try:
         section = 'app'
         settings[section] = {}
-        settings['app']['watch_dir'] = parser.get(section, 'watch_dir')
-        settings['app']['scan_interval'] = parser.getint(section, 'scan_interval')
-        settings['app']['log_level'] = parser.get(section, 'log_level')
-        settings['app']['error_file'] = parser.get(section, 'error_file')
+        settings[section]['watch_dir'] = parser.get(section, 'watch_dir')
+        settings[section]['scan_interval'] = parser.getint(section, 'scan_interval')
+        settings[section]['log_level'] = parser.get(section, 'log_level')
+        settings[section]['error_file'] = parser.get(section, 'error_file')
+        settings[section]['enable_decryption'] = parser.getboolean(section, 'enable_decryption') 
+        settings[section]['enable_compression'] = parser.getboolean(section, 'enable_compression')
+
         if parser.has_option(section, 'gpghome'):
-            settings['app']['gpghome'] = parser.get(section, 'gpghome')
+            settings[section]['gpghome'] = parser.get(section, 'gpghome')
         else:
-            settings['app']['gpghome'] = None
+            settings[section]['gpghome'] = None
     except Exception, e:
         die('Error in the configuration file.', e)
 
@@ -60,11 +64,22 @@ def validate_config(config_file):
         except Exception, e:
             die('Error in the configuration file.', e)
 
+    def validate_local(section):
+        try:
+            settings[section] = {}
+            settings[section]['type'] = parser.get(section, 'type')
+            settings[section]['destination'] = parser.get(section, 'destination')
+        except Exception, e:
+            die('Error in the configuration file.', e)
+
     for section_name in [section for section in parser.sections() if section != 'app']:
-        if parser.get(section_name, 'type') == 'cloudfiles':
+        _type = parser.get(section_name, 'type')
+        if _type == 'cloudfiles':
             validate_cloudfiles(section_name)
-        elif parser.get(section_name, 'type') == 'scp':
+        elif _type == 'scp':
             validate_scp(section_name)
+        elif _type == 'local':
+            validate_local(section_name)
         else:
             die('Unsupported transport type: %s/%s' % (section_name, parser.get(section_name)))
 
@@ -127,3 +142,20 @@ def ready_check(file_list, delay=10):
             ready_files.append(filename)
     
     return sorted(ready_files)
+
+def compress_file(filename, method='gzip'):
+    # TODO: Add debug message with new filesizes
+    success = False
+    compressed_filename = filename
+    if method is 'gzip':
+        compressed_filename += '.gz'
+        with open(filename, 'rb') as orig_file:
+            with gzip.open(compressed_filename, 'wb') as gzipped_file:
+                gzipped_file.writelines(orig_file)
+        success = True
+    else:
+        raise Exception("{0} is not a supported compression method.".format(method))
+
+    if success:
+        os.remove(filename)
+    return compressed_filename

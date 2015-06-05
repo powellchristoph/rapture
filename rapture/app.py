@@ -5,7 +5,7 @@ import sys
 import time
 
 from rapture import conf
-from rapture.util import setup_logging, ready_check, decrypt_file, die
+from rapture.util import *
 from rapture.transport.manager import TransportManager
 
 from requests.packages import urllib3
@@ -29,6 +29,7 @@ def shutdown(signum, frame):
 def run():
     signal.signal(signal.SIGTERM, shutdown)
     signal.signal(signal.SIGINT, shutdown)
+
     setup_logging(conf['app']['log_level'])
     watch_dir = conf['app']['watch_dir']
     scan_interval = conf['app']['scan_interval']
@@ -46,17 +47,32 @@ def run():
         ready_files = ready_check(found_files)
 
         # Find and decrypt any gpg files
-        encrypted_files = [f for f in ready_files if f.endswith('.gpg')]
-        for f in encrypted_files:
-            try:
-                debug("Decrypting {0}".format(f))
-                decrypted_file = decrypt_file(f, gpghome)
+        if conf['app']['enable_decryption']:
+            info('Decryption enabled, looking for encrypted files...')
+            encrypted_files = [f for f in ready_files if f.endswith('.gpg')]
+            for f in encrypted_files:
+                try:
+                    debug("Decrypting {0}".format(f))
+                    decrypted_file = decrypt_file(f, gpghome)
+                    ready_files.remove(f)
+                    ready_files.append(decrypted_file)
+                    os.remove(f)
+                except Exception as err:
+                    error("Error decrypting {0}: {1}".format(f, err))
+                    die('Error decrypting', err)
+        if conf['app']['enable_compression']:
+            info('Compression enabled, looking for uncompressed files...')
+            # TODO: This will need to change if supporting other compression types
+            uncompressed_files = [f for f in ready_files if not f.endswith('.gz')]
+            for f in uncompressed_files:
+                debug("Compressing {0}".format(f))
+                b_size = float(os.stat(f).st_size)
+                compressed_file = compress_file(f)
+                f_size = float(os.stat(compressed_file).st_size)
+                percentage = abs((b_size - f_size) / ((b_size + f_size) / 2) * 100)
+                debug("{0} was compressed {1:.2f}%".format(f, percentage))
                 ready_files.remove(f)
-                ready_files.append(decrypted_file)
-                os.remove(f)
-            except Exception as err:
-                error("Error decrypting {0}: {1}".format(f, err))
-                die('Error decrypting', err)
+                ready_files.append(compressed_file)
 
         tm.transfer(ready_files)
         debug("Sleeping for %d seconds." % scan_interval)

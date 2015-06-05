@@ -10,6 +10,7 @@ from rapture.transport.workers import *
 WORKER_FUNCTIONS = {
         'cloudfiles': cloudfiles_func,
         'scp': scp_func,
+        'local': local_move_func,
     }
 
 class TransportManager(object):
@@ -49,7 +50,6 @@ class TransportManager(object):
         self.dump_errors()
 
     def execute(self, filename, workers):
-        start = time.time()
         results = []
         for d in workers:
             worker = threading.Thread(
@@ -68,9 +68,8 @@ class TransportManager(object):
             self.errors[filename] = results
         else:
             # Transfer was successful, delete the file
-            end = time.time()
+            self.logger.info("{0} completed.".format(filename))
             self.errors.pop(filename, None)
-            self.logger.info("%s was successful. Completed in %.2f secs." % (filename, (end - start)))
             os.remove(filename)
 
     def dump_errors(self):
