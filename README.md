@@ -16,7 +16,6 @@ bin/rapture-app
 ## Config:
 Configure the [config file](https://github.com/powellchristoph/rapture/blob/master/etc/rapture.conf) with the appropriate values for either your Rackspace Cloud account or the SSH credentials of the server.
 
-### Encryption
 #### File decryption
 Supports the decryption of files before uploading them to Cloudfiles/SFTP. Currently supports GPG decryption, keys must already exists in *gpghome*. Set the *gpghome* setting to a different path if your keys are not stored in the default location. 
 ```
@@ -27,7 +26,6 @@ enable_decryption = no
 #### File encryption
 Not yet supported
 
-### Compression
 #### Compress files
 You can compress files before you upload them. Currently only supports gzip compression.
 ```
