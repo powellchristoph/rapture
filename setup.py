@@ -21,4 +21,5 @@ setup(
             'rapture-app= rapture.app:run',
         ]
     },
+    packages=find_packages(exclude=['tests*'])
 )
