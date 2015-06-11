@@ -59,7 +59,7 @@ def run():
                     os.remove(f)
                 except Exception as err:
                     error("Error decrypting {0}: {1}".format(f, err))
-                    die('Error decrypting', err)
+                    ready_files.remove(f)
         if conf['app']['enable_compression']:
             info('Compression enabled, looking for uncompressed files...')
             # TODO: This will need to change if supporting other compression types
