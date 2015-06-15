@@ -8,9 +8,22 @@ There is an included [upstart file](https://github.com/powellchristoph/rapture/b
 git clone https://github.com/powellchristoph/rapture.git /srv/rapture
 virtualenv /srv/rapture
 cd /srv/rapture
-source bin/rapture/activate
+source bin/activate
 pip install -e .
 bin/rapture-app
+```
+
+## Build
+```
+git clone https://github.com/powellchristoph/rapture.git rapture-build
+virtualenv rapture-build
+cd rapture-build
+source bin/activate
+pip install wheel
+python setup.py bdist_wheel
+
+# Resulting file in dist
+rapture-0.1.0-py2.py3-none-any.whl
 ```
 
 ## Config:
