@@ -6,6 +6,8 @@ import shutil
 import threading
 import time
 
+from datetime import datetime as dt
+
 import pyrax
 pyrax.set_setting("identity_type", "rackspace")
 
@@ -50,6 +52,8 @@ def cloudfiles_func(settings, filename, results):
     pyrax.set_setting('use_servicenet', settings['use_snet'])
     region = settings['region']
     container_name = settings['container_name']
+    nest_by_timestamp = settings.get('nest_by_timestamp', False)
+    obj_ttl = settings.get('set_ttl', None)
 
     try:
         cf = pyrax.connect_to_cloudfiles(region=region)
@@ -63,14 +67,26 @@ def cloudfiles_func(settings, filename, results):
         logger.error("{0} is too large. Files over 5GB are not currently supported.".format(filename))
         results.append(name)
         return
-    
+
+    obj_name = os.path.basename(filename)
+
+    # Create new obj_name for nested directory
+    if nest_by_timestamp:
+        t = os.path.getmtime(filename)
+        d = dt.fromtimestamp(t)
+        obj_name = "{year}/{month}/{day}/{filename}".format(
+                year=d.strftime("%Y"),
+                month=d.strftime("%m"),
+                day=d.strftime("%d"),
+                filename=obj_name)
+
     chksum = pyrax.utils.get_checksum(filename)
     for i in range(MAX_RETRIES):
         try:
             start = time.time()
             #Used for testing the retry
             #raise pyrax.exceptions.UploadFailed()
-            cf.upload_file(container, filename, etag=chksum)
+            obj = container.upload_file(filename, obj_name=obj_name, etag=chksum, ttl=obj_ttl)
             end = time.time()
             logger.debug("%s transferred to %s in %.2f secs." % (filename, container_name, (end - start)))
             break

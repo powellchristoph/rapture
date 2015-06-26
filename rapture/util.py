@@ -46,6 +46,10 @@ def validate_config(config_file):
             settings[section]['container_name'] = parser.get(section, 'container_name')
             settings[section]['region'] = parser.get(section, 'region')
             settings[section]['use_snet'] = parser.getboolean(section, 'use_snet')
+            if parser.has_option(section, 'nest_by_timestamp'):
+                settings[section]['nest_by_timestamp'] = parser.getboolean(section, 'nest_by_timestamp')
+            if parser.has_option(section, 'set_ttl'):
+                settings[section]['set_ttl'] = parser.getint(section, 'set_ttl')
         except Exception, e:
             die('Error in the configuration file.', e)
 
@@ -55,6 +59,8 @@ def validate_config(config_file):
             settings[section]['type'] = parser.get(section, 'type')
             settings[section]['address'] = parser.get(section, 'address')
             settings[section]['username'] = parser.get(section, 'username')
+            if parser.has_option(section, 'port'):
+                settings[section]['port'] = parser.getint(section, 'port')
             if parser.has_option(section, 'password'):
                 settings[section]['password'] = parser.get(section, 'password')
             elif parser.has_option(section, 'ssh_key'):

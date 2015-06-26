@@ -7,10 +7,8 @@ error_file = /root/.rapture
 # Will compress any files that are not gzipped
 # prior to transferring them
 enable_compression = no
-
 # Will decrypt any files with the .gpg extention
 enable_decryption = no
-
 # optional, it will use the users's default location ~/.gnupg
 gpghome = /root/.gnupg
 

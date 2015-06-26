@@ -62,4 +62,5 @@ target/
 .rapture
 etc/rapture.conf.orig
 etc/rapture.conf.test
+etc/rapture.conf
 

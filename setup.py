@@ -7,7 +7,7 @@ REQUIRES = ['pyrax', 'paramiko', 'python-gnupg']
             
 setup(
     name='rapture',
-    version='0.1.0',
+    version='0.2.0',
     description='Rapture - watches a directory and uploads files to the cloud',
     license='Apache License 2.0',
     url='github.com/powellchristoph/rapture',
