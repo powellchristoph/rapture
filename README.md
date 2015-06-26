@@ -29,7 +29,7 @@ rapture-0.1.0-py2.py3-none-any.whl
 ## General Config:
 Configure the [config file](https://github.com/powellchristoph/rapture/blob/master/etc/rapture.conf) with the appropriate values for either your Rackspace Cloud account or the SSH credentials of the server.
 
-Each destination is given its own block in the config file.
+Each destination is given its own block in the config file with a descriptive name. It can be anything you would like except, 'app'.
 ```
 [app]
 # Directory that Rapture watches for files
@@ -70,6 +70,7 @@ enable_decompression = no
 ## Cloudfiles Config:
 Cloudfiles specific configuration values
 ```
+[CLOUDFILES_DESTINATION]
 # Type of transport [REQUIRED]
 type = cloudfiles
 
@@ -101,6 +102,7 @@ set_ttl = 600
 ## SCP Config:
 SCP specific configuration values
 ```
+[SCP_DESTINATION]
 # Type of transport [REQUIRED]
 type = scp
 
