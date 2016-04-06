@@ -109,17 +109,21 @@ def scp_func(settings, filename, results):
     address = settings['address']
     username = settings['username']
     port = settings.get('port', 22)
+    destination = settings['destination']
 
     if 'password' in settings.keys():
         password = settings['password']
+        ssh_key  = None
     else:
         ssh_key = settings['ssh_key']
+        password = None
 
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
-        s.connect(address, port, username=username, password=password, timeout=4)
+        s.connect(address, port, username=username, password=password, key_filename=ssh_key, timeout=4)
         sftp = s.open_sftp()
+        sftp.chdir(destination)
     except Exception as e:
         results.append(name)
         return
