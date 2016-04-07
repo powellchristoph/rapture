@@ -59,6 +59,8 @@ def validate_config(config_file):
             settings[section]['type'] = parser.get(section, 'type')
             settings[section]['address'] = parser.get(section, 'address')
             settings[section]['username'] = parser.get(section, 'username')
+            if parser.has_option(section, 'destination'):
+                settings[section]['destination'] = parser.get(section, 'destination')
             if parser.has_option(section, 'port'):
                 settings[section]['port'] = parser.getint(section, 'port')
             if parser.has_option(section, 'password'):

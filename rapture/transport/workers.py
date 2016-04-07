@@ -109,18 +109,32 @@ def scp_func(settings, filename, results):
     address = settings['address']
     username = settings['username']
     port = settings.get('port', 22)
+    
+    if 'destination' in settings.keys():
+        destination = settings['destination']
+    else:
+        destination = None
 
     if 'password' in settings.keys():
         password = settings['password']
+        ssh_key  = None
     else:
         ssh_key = settings['ssh_key']
+        password = None
 
     s = paramiko.SSHClient()
     s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
-        s.connect(address, port, username=username, password=password, timeout=4)
+        s.connect(address, port, username=username, password=password, key_filename=ssh_key, timeout=4)
         sftp = s.open_sftp()
+        if destination:
+            try:
+                sftp.chdir(destination)
+            except IOError as e:
+                sftp.mkdir(destination)
+                sftp.chdir(destination)
     except Exception as e:
+        logger.error("Unable to connect via SCP. Transfer for {0} aborted, failing gracefully.".format(filename))
         results.append(name)
         return
 
