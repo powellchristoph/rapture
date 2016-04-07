@@ -109,7 +109,11 @@ def scp_func(settings, filename, results):
     address = settings['address']
     username = settings['username']
     port = settings.get('port', 22)
-    destination = settings['destination']
+    
+    if 'destination' in settings.keys():
+        destination = settings['destination']
+    else:
+        destination = None
 
     if 'password' in settings.keys():
         password = settings['password']
@@ -123,7 +127,12 @@ def scp_func(settings, filename, results):
     try:
         s.connect(address, port, username=username, password=password, key_filename=ssh_key, timeout=4)
         sftp = s.open_sftp()
-        sftp.chdir(destination)
+        if destination:
+            try:
+                sftp.chdir(destination)
+            except IOError as e:
+                sftp.mkdir(destination)
+                sftp.chdir(destination)
     except Exception as e:
         logger.error("Unable to connect via SCP. Transfer for {0} aborted, failing gracefully.".format(filename))
         results.append(name)
