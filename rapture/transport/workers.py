@@ -125,6 +125,7 @@ def scp_func(settings, filename, results):
         sftp = s.open_sftp()
         sftp.chdir(destination)
     except Exception as e:
+        logger.error("Unable to connect via SCP. Transfer for {0} aborted, failing gracefully.".format(filename))
         results.append(name)
         return
 
