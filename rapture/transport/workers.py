@@ -146,8 +146,8 @@ def scp_func(settings, filename, results):
             logger.debug("Tranfer completed in %.2f secs" % (end - start))
             break
         except Exception as e:
-            logger.warning("Upload to server:%s failed, retry %d" % (container_name, i + 1))
+            logger.warning("Upload to server:%s failed, retry %d" % (address, i + 1))
             time.sleep(2)
     else:
-        logger.error("Upload to server:%s failed!" % (container_name))
+        logger.error("Upload to server:%s failed!" % (address))
         results.append(name)
